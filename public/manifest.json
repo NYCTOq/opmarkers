@@ -1,0 +1,14 @@
+{
+  "name": "OPMarkers",
+  "version": "0.5.0",
+  "manifest_version": 1,
+  "author": "Huseyin Avni Kilic",
+  "description": "Condition markers, aura tools and dice roller for Owlbear Rodeo.",
+  "action": {
+    "title": "OPMarkers",
+    "icon": "/opmarkers/action-icon.svg",
+    "popover": "/opmarkers/",
+    "height": 680,
+    "width": 390
+  }
+}
