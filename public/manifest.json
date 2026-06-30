@@ -1,11 +1,11 @@
 {
-  "name": "OPMarkers",
-  "version": "0.5.0",
+  "name": "OP Tayfa Hizmet",
+  "version": "0.5.1",
   "manifest_version": 1,
   "author": "Huseyin Avni Kilic",
   "description": "Condition markers, aura tools and dice roller for Owlbear Rodeo.",
   "action": {
-    "title": "OPMarkers",
+    "title": "OP Tayfa Hizmet",
     "icon": "/opmarkers/action-icon.svg",
     "popover": "/opmarkers/",
     "height": 680,

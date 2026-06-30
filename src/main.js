@@ -119,7 +119,7 @@ let diceStack = [];
 function createAppShell() {
   document.querySelector("#app").innerHTML = `
     <div class="panel">
-      <h1>OPMarkers</h1>
+      <h1>OP Tayfa Hizmet</h1>
       <p class="subtitle">Condition, aura & dice tools</p>
       <p class="status" id="status">Owlbear bekleniyor...</p>
 
@@ -687,7 +687,7 @@ async function renderConditionIconsForToken(token) {
         }
       }
     )
-      .name(`OPMarkers Condition Icon - ${condition.label}`)
+      .name(`OP Tayfa Hizmet Condition Icon - ${condition.label}`)
       .position({
         x: startX + index * spacing,
         y
@@ -737,7 +737,7 @@ async function renderAuraItemsForToken(token) {
     };
 
     return buildShape()
-      .name(`OPMarkers Aura - ${feet} ft`)
+      .name(`OP Tayfa Hizmet Aura - ${feet} ft`)
       .shapeType("CIRCLE")
       .width(diameter)
       .height(diameter)
