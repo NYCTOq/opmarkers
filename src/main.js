@@ -16,52 +16,70 @@ const ICON_LAYER = "ATTACHMENT";
 const AURA_LAYER = "ATTACHMENT";
 
 const ICON_BASE_PATH = `${import.meta.env.BASE_URL}icons/`;
+const ICON_SCALE = 0.42;
+const ICON_SPACING_RATIO = 0.48;
+const ICON_Y_OFFSET_RATIO = 0.24;
 
 const conditionMarkers = [
   {
-    id: "concentration",
-    label: "Concentration",
-    file: "Concentration.png"
-  },
-  {
-    id: "bless",
-    label: "Bless",
-    file: "Bless.png"
-  },
-  {
-    id: "rage",
-    label: "Rage",
-    file: "Rage.png"
-  },
-  {
-    id: "poisoned",
-    label: "Poisoned",
-    file: "Poisoned.png"
-  },
-  {
-    id: "prone",
-    label: "Prone",
-    file: "Prone.png"
-  },
-  {
-    id: "haki",
-    label: "Haki",
-    file: "Haki.png"
-  },
-  {
-    id: "busoshokuHaki",
-    label: "Busoshoku Haki",
-    file: "Busoshoku Haki.png"
-  },
-  {
     id: "advantage",
     label: "Advantage",
-    file: "Advantage.png"
+    file: "advantage.png"
   },
   {
     id: "disadvantage",
     label: "Disadvantage",
-    file: "Disadvantage.png"
+    file: "disadvantage.png"
+  },
+  {
+    id: "bless",
+    label: "Bless",
+    file: "bless.png"
+  },
+  {
+    id: "concentration",
+    label: "Concentration",
+    file: "concentration.png"
+  },
+  {
+    id: "temp-hp",
+    label: "Temp HP",
+    file: "temp-hp.png"
+  },
+  {
+    id: "poisoned",
+    label: "Poisoned",
+    file: "poisoned.png"
+  },
+  {
+    id: "prone",
+    label: "Prone",
+    file: "prone.png"
+  },
+  {
+    id: "rage",
+    label: "Rage",
+    file: "rage.png"
+  },
+  {
+    id: "cursed",
+    label: "Cursed",
+    file: "cursed.png"
+  },
+  {
+    id: "observation-haki",
+    label: "Observation Haki",
+    file: "observation-haki.png"
+  },
+  {
+    id: "armament-haki",
+    label: "Armament Haki",
+    file: "armament-haki.png"
+  },
+  {
+    id: "conquerors-haki",
+    label: "Conqueror's Haki",
+    file: "conquerors-haki.png"
   }
 ];
 
@@ -662,14 +680,19 @@ async function renderConditionIconsForToken(token) {
 
   const tokenSize = Math.max(bounds.width, bounds.height);
 
-  const iconScale = 0.26;
-  const spacing = tokenSize * 0.32;
+  const iconScale = ICON_SCALE;
+  const spacing = tokenSize * ICON_SPACING_RATIO;
 
   const startX = bounds.center.x - ((activeConditions.length - 1) * spacing) / 2;
-  const y = bounds.min.y - tokenSize * 0.18;
+  const y = bounds.min.y - tokenSize * ICON_Y_OFFSET_RATIO;
 
-  const iconItems = activeConditions.map((conditionId, index) => {
-    const condition = getOptionById(conditionMarkers, conditionId);
+  const visibleConditions = activeConditions
+    .map((conditionId) => getOptionById(conditionMarkers, conditionId))
+    .filter(Boolean);
+
+  if (!visibleConditions.length) return;
+
+  const iconItems = visibleConditions.map((condition, index) => {
     const iconUrl = getIconUrl(condition.file);
 
     return buildImage(
@@ -702,7 +725,7 @@ async function renderConditionIconsForToken(token) {
       .metadata({
         [CONDITION_ICON_METADATA_KEY]: {
           tokenId: token.id,
-          conditionId
+          conditionId: condition.id
         }
       })
       .build();
