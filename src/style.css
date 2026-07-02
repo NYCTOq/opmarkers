@@ -75,6 +75,10 @@ h1 {
   margin-bottom: 8px;
 }
 
+.condition-action-row {
+  grid-template-columns: 1fr 72px 88px;
+}
+
 select {
   width: 100%;
   padding: 10px 9px;
@@ -103,6 +107,21 @@ select:focus {
 
 .add-button:hover {
   background: #31384b;
+}
+
+.remove-button {
+  padding: 10px 8px;
+  background: #3f1d1d;
+  color: #fecaca;
+  border: 1px solid #7f1d1d;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.remove-button:hover {
+  background: #5a2525;
 }
 
 .chips {

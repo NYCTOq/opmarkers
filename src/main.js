@@ -16,70 +16,52 @@ const ICON_LAYER = "ATTACHMENT";
 const AURA_LAYER = "ATTACHMENT";
 
 const ICON_BASE_PATH = `${import.meta.env.BASE_URL}icons/`;
-const ICON_SCALE = 0.20;
-const ICON_SPACING_RATIO = 0.4;
-const ICON_Y_OFFSET_RATIO = 0.3;
 
 const conditionMarkers = [
   {
-    id: "advantage",
-    label: "Advantage",
-    file: "advantage.png"
-  },
-  {
-    id: "disadvantage",
-    label: "Disadvantage",
-    file: "disadvantage.png"
+    id: "concentration",
+    label: "Concentration",
+    file: "Concentration.png"
   },
   {
     id: "bless",
     label: "Bless",
-    file: "bless.png"
-  },
-  {
-    id: "concentration",
-    label: "Concentration",
-    file: "concentration.png"
-  },
-  {
-    id: "temp-hp",
-    label: "Temp HP",
-    file: "temp-hp.png"
-  },
-  {
-    id: "poisoned",
-    label: "Poisoned",
-    file: "poisoned.png"
-  },
-  {
-    id: "prone",
-    label: "Prone",
-    file: "prone.png"
+    file: "Bless.png"
   },
   {
     id: "rage",
     label: "Rage",
-    file: "rage.png"
+    file: "Rage.png"
   },
   {
-    id: "cursed",
-    label: "Cursed",
-    file: "cursed.png"
+    id: "poisoned",
+    label: "Poisoned",
+    file: "Poisoned.png"
   },
   {
-    id: "observation-haki",
-    label: "Observation Haki",
-    file: "observation-haki.png"
+    id: "prone",
+    label: "Prone",
+    file: "Prone.png"
   },
   {
-    id: "armament-haki",
-    label: "Armament Haki",
-    file: "armament-haki.png"
+    id: "haki",
+    label: "Haki",
+    file: "Haki.png"
   },
   {
-    id: "conquerors-haki",
-    label: "Conqueror's Haki",
-    file: "conquerors-haki.png"
+    id: "busoshokuHaki",
+    label: "Busoshoku Haki",
+    file: "Busoshoku Haki.png"
+  },
+  {
+    id: "advantage",
+    label: "Advantage",
+    file: "Advantage.png"
+  },
+  {
+    id: "disadvantage",
+    label: "Disadvantage",
+    file: "Disadvantage.png"
   }
 ];
 
@@ -129,7 +111,7 @@ const auraColors = {
   }
 };
 
-let selectedItemId = null;
+let selectedItemIds = [];
 let isRendering = false;
 let diceHistory = [];
 let diceStack = [];
@@ -137,7 +119,7 @@ let diceStack = [];
 function createAppShell() {
   document.querySelector("#app").innerHTML = `
     <div class="panel">
-      <h1>OP Tayfa Hizmet</h1>
+      <h1>OPMarkers</h1>
       <p class="subtitle">Condition, aura & dice tools</p>
       <p class="status" id="status">Owlbear bekleniyor...</p>
 
@@ -145,9 +127,10 @@ function createAppShell() {
 
       <div class="marker-section">
         <div class="section-title">Condition Marker</div>
-        <div class="add-row">
+        <div class="add-row condition-action-row">
           <select id="conditionSelect"></select>
           <button id="addConditionButton" class="add-button">Add</button>
+          <button id="removeConditionButton" class="remove-button">Remove</button>
         </div>
         <div id="activeConditions" class="chips"></div>
       </div>
@@ -161,7 +144,7 @@ function createAppShell() {
         <div id="activeAuras" class="chips"></div>
       </div>
 
-      <button id="clearAllButton" class="clear-button hidden">Clear All</button>
+      <button id="clearAllButton" class="clear-button hidden">Clear All Selected</button>
 
       <div class="marker-section dice-section">
         <div class="section-title">Dice Roller</div>
@@ -239,7 +222,11 @@ function isLegacyCustomMarkerIcon(item) {
 }
 
 function isGeneratedMarkerItem(item) {
-  return isConditionIcon(item) || isAuraItem(item) || isLegacyCustomMarkerIcon(item);
+  return (
+    isConditionIcon(item) ||
+    isAuraItem(item) ||
+    isLegacyCustomMarkerIcon(item)
+  );
 }
 
 function getOptionById(options, id) {
@@ -540,28 +527,58 @@ function renderNoSelection() {
   document.querySelector("#clearAllButton").classList.add("hidden");
 }
 
-function renderPanel(item) {
-  const activeConditions = getActiveConditions(item);
-  const activeAuras = getActiveAuras(item);
+function renderPanel(items) {
+  const firstItem = items[0];
+  const selectedCount = items.length;
+  const isMultiSelection = selectedCount > 1;
 
-  document.querySelector("#status").textContent = "Token seçildi.";
+  const activeConditions = getActiveConditions(firstItem);
+  const activeAuras = getActiveAuras(firstItem);
+
+  document.querySelector("#status").textContent =
+    selectedCount === 1
+      ? "Token seçildi."
+      : `${selectedCount} token seçildi.`;
 
   const tokenInfo = document.querySelector("#tokenInfo");
   tokenInfo.classList.remove("hidden");
-  tokenInfo.innerHTML = `
-    <strong>${item.name ?? "İsimsiz Token"}</strong>
-    <span>${item.id}</span>
-  `;
+
+  if (selectedCount === 1) {
+    tokenInfo.innerHTML = `
+      <strong>${firstItem.name ?? "İsimsiz Token"}</strong>
+      <span>${firstItem.id}</span>
+    `;
+  } else {
+    tokenInfo.innerHTML = `
+      <strong>${selectedCount} token seçildi</strong>
+      <span>Add, Remove ve Clear işlemleri sadece seçili tokenlara uygulanır.</span>
+    `;
+  }
 
   renderSelect("#conditionSelect", conditionMarkers);
   renderSelect("#auraSelect", auraOptions);
 
-  renderActiveConditionChips(activeConditions);
-  renderActiveAuraChips(activeAuras);
+  if (isMultiSelection) {
+    document.querySelector("#activeConditions").innerHTML = `
+      <span class="empty-chip">Dropdown’dan seçerek toplu ekleme veya kaldırma yapabilirsin.</span>
+    `;
+
+    document.querySelector("#activeAuras").innerHTML = `
+      <span class="empty-chip">Aura işlemleri sadece seçili tokenlara uygulanır.</span>
+    `;
+  } else {
+    renderActiveConditionChips(activeConditions);
+    renderActiveAuraChips(activeAuras);
+  }
 
   document.querySelector("#addConditionButton").onclick = async () => {
     const selectedConditionId = document.querySelector("#conditionSelect").value;
     await addCondition(selectedConditionId);
+  };
+
+  document.querySelector("#removeConditionButton").onclick = async () => {
+    const selectedConditionId = document.querySelector("#conditionSelect").value;
+    await removeCondition(selectedConditionId);
   };
 
   document.querySelector("#addAuraButton").onclick = async () => {
@@ -680,19 +697,14 @@ async function renderConditionIconsForToken(token) {
 
   const tokenSize = Math.max(bounds.width, bounds.height);
 
-  const iconScale = ICON_SCALE;
-  const spacing = tokenSize * ICON_SPACING_RATIO;
+  const iconScale = 0.38;
+  const spacing = tokenSize * 0.44;
 
   const startX = bounds.center.x - ((activeConditions.length - 1) * spacing) / 2;
-  const y = bounds.min.y - tokenSize * ICON_Y_OFFSET_RATIO;
+  const y = bounds.min.y - tokenSize * 0.24;
 
-  const visibleConditions = activeConditions
-    .map((conditionId) => getOptionById(conditionMarkers, conditionId))
-    .filter(Boolean);
-
-  if (!visibleConditions.length) return;
-
-  const iconItems = visibleConditions.map((condition, index) => {
+  const iconItems = activeConditions.map((conditionId, index) => {
+    const condition = getOptionById(conditionMarkers, conditionId);
     const iconUrl = getIconUrl(condition.file);
 
     return buildImage(
@@ -710,7 +722,7 @@ async function renderConditionIconsForToken(token) {
         }
       }
     )
-      .name(`OP Tayfa Hizmet Condition Icon - ${condition.label}`)
+      .name(`OPMarkers Condition Icon - ${condition.label}`)
       .position({
         x: startX + index * spacing,
         y
@@ -725,7 +737,7 @@ async function renderConditionIconsForToken(token) {
       .metadata({
         [CONDITION_ICON_METADATA_KEY]: {
           tokenId: token.id,
-          conditionId: condition.id
+          conditionId
         }
       })
       .build();
@@ -760,7 +772,7 @@ async function renderAuraItemsForToken(token) {
     };
 
     return buildShape()
-      .name(`OP Tayfa Hizmet Aura - ${feet} ft`)
+      .name(`OPMarkers Aura - ${feet} ft`)
       .shapeType("CIRCLE")
       .width(diameter)
       .height(diameter)
@@ -790,28 +802,33 @@ async function renderAuraItemsForToken(token) {
 }
 
 async function refreshSelectedTokenMarkers() {
-  if (!selectedItemId || isRendering) return;
+  if (!selectedItemIds.length || isRendering) return;
 
   isRendering = true;
 
   try {
-    const items = await OBR.scene.items.getItems([selectedItemId]);
-    const token = items[0];
+    const items = await OBR.scene.items.getItems(selectedItemIds);
 
-    if (!token || isGeneratedMarkerItem(token)) return;
+    const tokens = items.filter((item) => {
+      return item && !isGeneratedMarkerItem(item);
+    });
 
-    await renderConditionIconsForToken(token);
-    await renderAuraItemsForToken(token);
+    for (const token of tokens) {
+      await renderConditionIconsForToken(token);
+      await renderAuraItemsForToken(token);
+    }
   } finally {
     isRendering = false;
   }
 }
 
 async function updateTokenArray(metadataKey, updater) {
-  if (!selectedItemId) return;
+  if (!selectedItemIds.length) return;
 
-  await OBR.scene.items.updateItems([selectedItemId], (items) => {
+  await OBR.scene.items.updateItems(selectedItemIds, (items) => {
     for (const item of items) {
+      if (isGeneratedMarkerItem(item)) continue;
+
       const current = item.metadata[metadataKey] ?? [];
       item.metadata[metadataKey] = updater(current);
     }
@@ -828,9 +845,19 @@ async function addCondition(conditionId) {
 }
 
 async function removeCondition(conditionId) {
-  await updateTokenArray(CONDITION_METADATA_KEY, (current) =>
-    current.filter((id) => id !== conditionId)
-  );
+  if (!selectedItemIds.length) return;
+
+  await OBR.scene.items.updateItems(selectedItemIds, (items) => {
+    for (const item of items) {
+      if (isGeneratedMarkerItem(item)) continue;
+
+      const current = item.metadata[CONDITION_METADATA_KEY] ?? [];
+
+      item.metadata[CONDITION_METADATA_KEY] = current.filter((id) => {
+        return id !== conditionId;
+      });
+    }
+  });
 
   await refreshSelectedTokenMarkers();
   await loadSelectedItem();
@@ -846,28 +873,40 @@ async function addAura(auraId) {
 }
 
 async function removeAura(auraId) {
-  await updateTokenArray(AURA_METADATA_KEY, (current) =>
-    current.filter((id) => id !== auraId)
-  );
+  if (!selectedItemIds.length) return;
+
+  await OBR.scene.items.updateItems(selectedItemIds, (items) => {
+    for (const item of items) {
+      if (isGeneratedMarkerItem(item)) continue;
+
+      const current = item.metadata[AURA_METADATA_KEY] ?? [];
+      item.metadata[AURA_METADATA_KEY] = current.filter((id) => id !== auraId);
+    }
+  });
 
   await refreshSelectedTokenMarkers();
   await loadSelectedItem();
 }
 
 async function clearAllMarkers() {
-  if (!selectedItemId) return;
+  if (!selectedItemIds.length) return;
 
-  await OBR.scene.items.updateItems([selectedItemId], (items) => {
+  await OBR.scene.items.updateItems(selectedItemIds, (items) => {
     for (const item of items) {
+      if (isGeneratedMarkerItem(item)) continue;
+
       item.metadata[CONDITION_METADATA_KEY] = [];
       item.metadata[AURA_METADATA_KEY] = [];
       item.metadata[LEGACY_CUSTOM_MARKERS_METADATA_KEY] = [];
     }
   });
 
-  await deleteConditionIconsForToken(selectedItemId);
-  await deleteLegacyCustomIconsForToken(selectedItemId);
-  await deleteAuraItemsForToken(selectedItemId);
+  for (const tokenId of selectedItemIds) {
+    await deleteConditionIconsForToken(tokenId);
+    await deleteLegacyCustomIconsForToken(tokenId);
+    await deleteAuraItemsForToken(tokenId);
+  }
+
   await loadSelectedItem();
 }
 
@@ -877,25 +916,25 @@ async function loadSelectedItem() {
   const selection = await OBR.player.getSelection();
 
   if (!selection || selection.length === 0) {
-    selectedItemId = null;
+    selectedItemIds = [];
     renderNoSelection();
     return;
   }
 
   const selectedItems = await OBR.scene.items.getItems(selection);
 
-  const selectedToken = selectedItems.find((item) => {
+  const selectedTokens = selectedItems.filter((item) => {
     return item && !isGeneratedMarkerItem(item);
   });
 
-  if (!selectedToken) {
-    selectedItemId = null;
+  if (!selectedTokens.length) {
+    selectedItemIds = [];
     renderNoSelection();
     return;
   }
 
-  selectedItemId = selectedToken.id;
-  renderPanel(selectedToken);
+  selectedItemIds = selectedTokens.map((item) => item.id);
+  renderPanel(selectedTokens);
 }
 
 createAppShell();
