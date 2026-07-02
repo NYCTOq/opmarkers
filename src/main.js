@@ -16,8 +16,8 @@ const ICON_LAYER = "ATTACHMENT";
 const AURA_LAYER = "ATTACHMENT";
 
 const ICON_BASE_PATH = `${import.meta.env.BASE_URL}icons/`;
-const ICON_SCALE = 0.24;
-const ICON_SPACING_RATIO = 0.5;
+const ICON_SCALE = 0.20;
+const ICON_SPACING_RATIO = 0.4;
 const ICON_Y_OFFSET_RATIO = 0.3;
 
 const conditionMarkers = [
